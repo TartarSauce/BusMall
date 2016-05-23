@@ -1,0 +1,15 @@
+#threeimgset {
+  width: 80%;
+  display:flex;
+  justify-content: space-between;
+  border:1px solid red;
+}
+
+#threeimgset div {
+  width:30%;
+  border:1px solid blue;
+}
+
+#img1, #img2, #img3 {
+  width:100%;
+}
