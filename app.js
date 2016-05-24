@@ -126,7 +126,7 @@ var data = {
   datasets: [
     {
       data: clicks,
-      label: "Clicks per Product"
+      label: 'Clicks per Product',
       backgroundColor:'darkseagreen',
       hoverBackgroundColor: 'blue'
     }
