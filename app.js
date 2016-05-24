@@ -9,6 +9,7 @@ var allNames = ['bag', 'boots', 'chair', 'dragon', 'scissors', 'tauntaun',
 
 // the array that will hold all image objects
 var allImages = [];
+var clicks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 // track how many times the trio of images are shown
 var counter25 = 0;
@@ -86,6 +87,7 @@ function displayStats() {
     console.log(allImages[i].name + ' had numClicks ' + allImages[i].numClicks
     + ' and numShown ' + allImages[i].numShown);
   }
+  drawChart();
   counter25 = 0;
 }
 
@@ -110,11 +112,38 @@ function handleClick(event) {
     if (imgName[0] === allImages[i].getName()) {
       var clickIndex = i;
       allImages[i].updateClicks();
+      clicks[i] += allImages[i].numClicks;
     }
   }
 
   // display next set of images
   displayRandomImages();
+}
+
+// create data structure
+var data = {
+  labels: allNames,
+  datasets: [
+    {
+      data: clicks,
+      label: "Clicks per Product"
+      backgroundColor:'darkseagreen',
+      hoverBackgroundColor: 'blue'
+    }
+  ]
+};
+
+// drawChart
+function drawChart() {
+  var clicksChart = document.getElementById('clicksChart').getContext('2d');
+  songChart = new Chart(clicksChart,{
+    type: 'bar',
+    data: data,
+    options: {
+      responsive: false
+    }
+  });
+  chartDrawn = true;
 }
 
 //---------------------------------

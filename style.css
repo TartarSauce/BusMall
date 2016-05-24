@@ -1,3 +1,7 @@
+* {
+  border: 1px solid red;
+}
+
 #threeimgset {
   padding-top: 100px;
   width: 80%;
@@ -9,8 +13,8 @@
 
 #threeimgset div {
   width:30%;
-  border:1px solid #cccccc;
-  box-shadow: 5px 8px 5px #cccccc;
+  border:1px solid #bcbcbc;
+  box-shadow: 5px 8px 5px #bcbcbc;
 }
 
 #img1, #img2, #img3 {
@@ -18,4 +22,14 @@
    max-width: 100%;
    display:block;
    margin:auto;
+}
+
+#chartContainer {
+  width: 80%;
+  margin: 0 auto;
+  padding-top:50px;
+}
+
+#clicksChart {
+  width:100%;
 }
