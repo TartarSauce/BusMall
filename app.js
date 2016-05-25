@@ -9,14 +9,21 @@ var allNames = ['bag', 'boots', 'chair', 'dragon', 'scissors', 'tauntaun',
 
 // the array that will hold all image objects
 var allImages = [];
+var clicks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 // track how many times the trio of images are shown
 var counter25 = 0;
 
+var chart = null;
+
 // handle to DOM elements containing images
+var imageContainerElement = document.getElementById('threeimgset');
 var imageElement1 = document.getElementById('img1');
 var imageElement2 = document.getElementById('img2');
 var imageElement3 = document.getElementById('img3');
+var startButtonElement = document.getElementById('startButton');
+var surveyResultsButtonElement = document.getElementById('surveyButton');
+var clicksChart = document.getElementById('clicksChart').getContext('2d');
 
 //---------------------------------
 // CLASS DEFINITION
@@ -30,29 +37,16 @@ function SurveyImage (name) {
 };
 
 //---------------------------------
-// PROTOTYPE FUNCTIONS
-//---------------------------------
-// update the number of clicks
-SurveyImage.prototype.updateClicks = function() {
-  this.numClicks++;
-};
-
-// update the number of times the image is shown to user
-SurveyImage.prototype.updateShown = function() {
-  this.numShown++;
-};
-
-// retrieve the image name
-SurveyImage.prototype.getName = function() {
-  return this.name;
-};
-
-//---------------------------------
 // OTHER SUPPORTING FUNCTIONS, EVENT HANDLERS
 //---------------------------------
 // display a random set of 3 images
 function displayRandomImages() {
-  counter25++;  // track counter to 25
+  startButtonElement.disabled = true;
+
+  if (chart != null){
+    chart.destroy();
+  }
+  counter25++;
 
   if (counter25 < 26) {
     var randIndex1 = Math.floor(Math.random() * (allImages.length - 0));
@@ -64,57 +58,90 @@ function displayRandomImages() {
     while ((randIndex1 === randIndex3) || (randIndex2 === randIndex3)) {
       var randIndex3 = Math.floor(Math.random() * (allImages.length - 0));
     }
-    console.log(randIndex1, randIndex2, randIndex3);
-
-    // display all images on screen
+    // display all images on screen - src and alt updated
     imageElement1.src = allImages[randIndex1].path;
     imageElement2.src = allImages[randIndex2].path;
     imageElement3.src = allImages[randIndex3].path;
+    imageElement1.alt = allImages[randIndex1].name;
+    imageElement2.alt = allImages[randIndex2].name;
+    imageElement3.alt = allImages[randIndex3].name;
+
+    // Attach event handler to the containers holding the images
+    imageElement1.addEventListener('click', handleClick);
+    imageElement2.addEventListener('click', handleClick);
+    imageElement3.addEventListener('click', handleClick);
 
     // increment numShown on all those images
-    allImages[randIndex1].updateShown();
-    allImages[randIndex2].updateShown();
-    allImages[randIndex3].updateShown();
-  } else {
-    displayStats();
+    allImages[randIndex1].numShown += 1;
+    allImages[randIndex2].numShown += 1;
+    allImages[randIndex3].numShown += 1;
   }
-}
-
-// show stats to console when done with 25, reset counter25
-function displayStats() {
-  for (var i = 0; i < allImages.length; i++) {
-    console.log(allImages[i].name + ' had numClicks ' + allImages[i].numClicks
-    + ' and numShown ' + allImages[i].numShown);
+  else {
+    surveyResultsButtonElement.disabled = false;
+    surveyResultsButtonElement.addEventListener('click', displayStats);
+    imageContainerElement.disabled = true;
+    imageContainerElement.style.opacity = 0.4;
+    // remove event handler to the containers holding the images
+    imageElement1.removeEventListener('click', handleClick);
+    imageElement2.removeEventListener('click', handleClick);
+    imageElement3.removeEventListener('click', handleClick);
   }
-  counter25 = 0;
 }
 
 // Event handler for the click event
 function handleClick(event) {
-  // get the image element that was clicked on
-  var clickedElement = document.getElementById(event.target.id);
-
-  // get the path attached to the image element, split the string
-  var pathArray = ((clickedElement.src).split('/'));
-
-  // get the last element which is the name of the jpg file
-  var length = pathArray.length;
-
-  // remove the .jpg suffix to get only the name
-  var imgName = pathArray[length - 1].split('.');
-  console.log(imgName[0]);
-
-  // loop through the image array, find image object corresponding
-  // to the one user clicked on, and increment click count
   for (var i = 0; i < allImages.length; i++) {
-    if (imgName[0] === allImages[i].getName()) {
-      var clickIndex = i;
-      allImages[i].updateClicks();
+    if (event.target.alt === allImages[i].name) {
+      allImages[i].numClicks += 1;
+      clicks[i] = allImages[i].numClicks;
+      console.log(allImages[i].name + ' has ' + allImages[i].numClicks + ' clicks');
     }
   }
-
   // display next set of images
   displayRandomImages();
+}
+
+// show stats to console when done with 25, reset counter25
+function displayStats() {
+  drawChart();
+  counter25 = 0;
+  resetStats();
+  startButtonElement.disabled = false;
+  imageContainerElement.disabled = false;
+  imageContainerElement.style.opacity = 1;
+  surveyResultsButtonElement.disabled = true;
+}
+
+// reset the arrays for clicks and views
+function resetStats() {
+  for (var i = 0; i < allImages.length; i++) {
+    allImages[i].numClicks = 0;
+    allImages[i].numShown = 0;
+  }
+}
+
+// drawChart
+function drawChart() {
+  // create data structure for plotting click data
+  var data = {
+    labels: allNames,
+    datasets: [
+      {
+        data: clicks,
+        label: 'Clicks per Product',
+        backgroundColor:'#BE666E',
+        hoverBackgroundColor: '#ABB49A'
+      }
+    ]
+  };
+
+  chart = new Chart(clicksChart,{
+    type: 'bar',
+    data: data,
+    options: {
+      responsive: false
+    }
+  });
 }
 
 //---------------------------------
@@ -125,10 +152,7 @@ for (var i = 0; i < allNames.length; i++) {
   var newImg = new SurveyImage(allNames[i]);
 }
 
-// display the first set of random images
-displayRandomImages();
+surveyResultsButtonElement.disabled = true;
 
-// Attach event handler to the containers holding the images
-imageElement1.addEventListener('click', handleClick);
-imageElement2.addEventListener('click', handleClick);
-imageElement3.addEventListener('click', handleClick);
+// Attach event listeners to the start buttons
+startButtonElement.addEventListener('click', displayRandomImages);
