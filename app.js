@@ -9,7 +9,7 @@ var allNames = ['bag', 'boots', 'chair', 'dragon', 'scissors', 'tauntaun',
 
 // the array that will hold all image objects
 var allImages = [];
-var clicks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+// var clicks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 // track how many times the trio of images are shown
 var counter25 = 0;
@@ -24,6 +24,7 @@ var imageElement3 = document.getElementById('img3');
 var startButtonElement = document.getElementById('startButton');
 var surveyResultsButtonElement = document.getElementById('surveyButton');
 var clicksChart = document.getElementById('clicksChart').getContext('2d');
+var clearLSButton = document.getElementById('clearLS');
 
 //---------------------------------
 // CLASS DEFINITION
@@ -46,9 +47,8 @@ function displayRandomImages() {
   if (chart != null){
     chart.destroy();
   }
-  counter25++;
 
-  if (counter25 < 26) {
+  if (counter25 < 25) {
     var randIndex1 = Math.floor(Math.random() * (allImages.length - 0));
     var randIndex2 = Math.floor(Math.random() * (allImages.length - 0));
     while (randIndex1 === randIndex2) {
@@ -75,6 +75,8 @@ function displayRandomImages() {
     allImages[randIndex1].numShown += 1;
     allImages[randIndex2].numShown += 1;
     allImages[randIndex3].numShown += 1;
+
+    counter25++;
   }
   else {
     surveyResultsButtonElement.disabled = false;
@@ -88,13 +90,28 @@ function displayRandomImages() {
   }
 }
 
+// 1.	Start with <data>
+// 2.	JSON.stringify(keyname, data)
+// 3.	localStorage.setItem()
+// 4.	localStorage.getItem()
+// 5.	JSON.parse(itemretrieved)
+// 6.	End with <data>
+
 // Event handler for the click event
 function handleClick(event) {
   for (var i = 0; i < allImages.length; i++) {
     if (event.target.alt === allImages[i].name) {
+      var imgStats = [];
       allImages[i].numClicks += 1;
-      clicks[i] = allImages[i].numClicks;
-      console.log(allImages[i].name + ' has ' + allImages[i].numClicks + ' clicks');
+      // clicks[i] = allImages[i].numClicks;
+      imgStats.push(allImages[i].numClicks);
+      imgStats.push(allImages[i].numShown);
+      localStorage.setItem(allImages[i].name, JSON.stringify(imgStats));
+      // var data = JSON.parse(localStorage.getItem(allImages[i].name));
+      // console.log(data);
+      // console.log(data[0], data[1]);
+      //console.log(clickStorage);
+      //console.log(allImages[i].name + ' has ' + allImages[i].numClicks + ' clicks');
     }
   }
   // display next set of images
@@ -105,7 +122,7 @@ function handleClick(event) {
 function displayStats() {
   drawChart();
   counter25 = 0;
-  resetStats();
+  //resetStats();
   startButtonElement.disabled = false;
   imageContainerElement.disabled = false;
   imageContainerElement.style.opacity = 1;
@@ -113,15 +130,25 @@ function displayStats() {
 }
 
 // reset the arrays for clicks and views
-function resetStats() {
-  for (var i = 0; i < allImages.length; i++) {
-    allImages[i].numClicks = 0;
-    allImages[i].numShown = 0;
-  }
-}
+// function resetStats() {
+//   for (var i = 0; i < allImages.length; i++) {
+//     allImages[i].numClicks = 0;
+//     allImages[i].numShown = 0;
+//   }
+// }
 
 // drawChart
 function drawChart() {
+  var clicks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  for (var i = 0; i < allImages.length; i++) {
+    if (localStorage.getItem(allImages[i].name) !== null) {
+      var rawdata = JSON.parse(localStorage.getItem(allImages[i].name));
+      console.log(rawdata);
+      console.log(rawdata[0], rawdata[1]);
+      clicks[i] += rawdata[0];
+    }
+  }
+
   // create data structure for plotting click data
   var data = {
     labels: allNames,
@@ -144,6 +171,22 @@ function drawChart() {
   });
 }
 
+function loadLocalStorage() {
+  for (var i = 0; i < allImages.length; i++) {
+    if (localStorage.getItem(allImages[i].name) !== null) {
+      var rawdata = JSON.parse(localStorage.getItem(allImages[i].name));
+      console.log(rawdata);
+      console.log(rawdata[0], rawdata[1]);
+      allImages[i].numClicks = rawdata[0];
+      allImages[i].numShown = rawdata[1];
+    }
+  }
+}
+
+function clearLocalStorage() {
+  localStorage.clear();
+}
+
 //---------------------------------
 // MAIN SECTION OF EXECUTABLE CODE
 //---------------------------------
@@ -152,7 +195,11 @@ for (var i = 0; i < allNames.length; i++) {
   var newImg = new SurveyImage(allNames[i]);
 }
 
+clearLSButton.addEventListener('click', clearLocalStorage);
+
 surveyResultsButtonElement.disabled = true;
 
 // Attach event listeners to the start buttons
 startButtonElement.addEventListener('click', displayRandomImages);
+
+window.addEventListener('load', loadLocalStorage);
