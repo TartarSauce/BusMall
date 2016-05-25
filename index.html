@@ -2,11 +2,25 @@
 
 <html>
 <head>
-  <link href="style.css" type="text/css" rel="stylesheet" />
+  <link href="style.css" type="text/css" rel="stylesheet"/>
   <script src="chart.js"></script>
 </head>
 
 <body>
+  <header>
+    <p>BUS MALL</p>
+  </header>
+  <p id="tagline">Shop while you bus</p>
+  <div id="startSurveyContainer">
+    <div id="userMessage">
+      Welcome to the BusMall survey. Click on any one of the three displayed products below to
+      indicate which one you prefer the most. You will have to complete 25 rounds of selections before
+      you can access the popularity chart. To begin, select the Begin Survey button below. <b>Scroll down</b>
+      to view survey results when done.
+    </div>
+     <button id="startButton">Begin Survey</button>
+ </div>
+
   <div id="threeimgset">
     <div id="img1div">
       <img id="img1" src="imgs/usb.jpg"/>
@@ -19,7 +33,9 @@
     </div>
   </div>
 
-   <button id="showResults">Show Survey Results</button>
+  <div id="surveyButtonContainer">
+   <button id="surveyButton">Show Survey Results</button>
+ </div>
 
   <div id="chartContainer">
    <canvas id="clicksChart" width="800px" height="400px"></canvas>
