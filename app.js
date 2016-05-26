@@ -7,14 +7,9 @@ var allNames = ['bag', 'boots', 'chair', 'dragon', 'scissors', 'tauntaun',
                     'water-can', 'bathroom', 'bubblegum', 'dog-duck', 'pet-sweep',
                     'sweep', 'wine-glass'];
 
-// the array that will hold all image objects
-var allImages = [];
-// var clicks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-// track how many times the trio of images are shown
-var counter25 = 0;
-
-var chart = null;
+var allImages = []; // the array that will hold all image objects
+var counter25 = 0;  // track how many times the trio of images are shown
+var chart = null;   // initialize the chart object
 
 // handle to DOM elements containing images
 var imageContainerElement = document.getElementById('threeimgset');
@@ -49,14 +44,14 @@ function displayRandomImages() {
   }
 
   if (counter25 < 25) {
-    var randIndex1 = Math.floor(Math.random() * (allImages.length - 0));
-    var randIndex2 = Math.floor(Math.random() * (allImages.length - 0));
+    var randIndex1 = Math.floor(Math.random() * allImages.length);
+    var randIndex2 = Math.floor(Math.random() * allImages.length);
     while (randIndex1 === randIndex2) {
-      var randIndex2 = Math.floor(Math.random() * (allImages.length - 0));
+      var randIndex2 = Math.floor(Math.random() * allImages.length);
     }
-    var randIndex3 = Math.floor(Math.random() * (allImages.length - 0));
+    var randIndex3 = Math.floor(Math.random() * allImages.length);
     while ((randIndex1 === randIndex3) || (randIndex2 === randIndex3)) {
-      var randIndex3 = Math.floor(Math.random() * (allImages.length - 0));
+      var randIndex3 = Math.floor(Math.random() * allImages.length);
     }
     // display all images on screen - src and alt updated
     imageElement1.src = allImages[randIndex1].path;
@@ -79,10 +74,13 @@ function displayRandomImages() {
     counter25++;
   }
   else {
-    surveyResultsButtonElement.disabled = false;
+    surveyResultsButtonElement.style.visibility = 'visible';
+    alert('Thank you for completing the survey. '
+        + 'Click the Show Survey Results button below to see the results of your survey.');
     surveyResultsButtonElement.addEventListener('click', displayStats);
     imageContainerElement.disabled = true;
     imageContainerElement.style.opacity = 0.4;
+
     // remove event handler to the containers holding the images
     imageElement1.removeEventListener('click', handleClick);
     imageElement2.removeEventListener('click', handleClick);
@@ -90,29 +88,17 @@ function displayRandomImages() {
   }
 }
 
-// 1.	Start with <data>
-// 2.	JSON.stringify(keyname, data)
-// 3.	localStorage.setItem()
-// 4.	localStorage.getItem()
-// 5.	JSON.parse(itemretrieved)
-// 6.	End with <data>
-
 // Event handler for the click event
 function handleClick(event) {
   for (var i = 0; i < allImages.length; i++) {
     if (event.target.alt === allImages[i].name) {
-      var imgStats = [];
       allImages[i].numClicks += 1;
-      // clicks[i] = allImages[i].numClicks;
-      imgStats.push(allImages[i].numClicks);
-      imgStats.push(allImages[i].numShown);
-      localStorage.setItem(allImages[i].name, JSON.stringify(imgStats));
-      // var data = JSON.parse(localStorage.getItem(allImages[i].name));
-      // console.log(data);
-      // console.log(data[0], data[1]);
-      //console.log(clickStorage);
-      //console.log(allImages[i].name + ' has ' + allImages[i].numClicks + ' clicks');
     }
+    // add the click and view data for all images to local storage
+    var imgStats = [];
+    imgStats.push(allImages[i].numClicks);
+    imgStats.push(allImages[i].numShown);
+    localStorage.setItem(allImages[i].name, JSON.stringify(imgStats));
   }
   // display next set of images
   displayRandomImages();
@@ -122,61 +108,75 @@ function handleClick(event) {
 function displayStats() {
   drawChart();
   counter25 = 0;
-  //resetStats();
   startButtonElement.disabled = false;
   imageContainerElement.disabled = false;
   imageContainerElement.style.opacity = 1;
-  surveyResultsButtonElement.disabled = true;
+  surveyResultsButtonElement.style.visibility = 'hidden';
 }
 
-// reset the arrays for clicks and views
-// function resetStats() {
-//   for (var i = 0; i < allImages.length; i++) {
-//     allImages[i].numClicks = 0;
-//     allImages[i].numShown = 0;
-//   }
-// }
+//reset the arrays for clicks and views
+function resetStats() {
+  for (var i = 0; i < allImages.length; i++) {
+    allImages[i].numClicks = 0;
+    allImages[i].numShown = 0;
+  }
+}
 
 // drawChart
 function drawChart() {
+  // retrieve clicks and views from local storage and set up data arrays for chart
   var clicks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  var views = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  var percents = [];
   for (var i = 0; i < allImages.length; i++) {
     if (localStorage.getItem(allImages[i].name) !== null) {
       var rawdata = JSON.parse(localStorage.getItem(allImages[i].name));
       console.log(rawdata);
       console.log(rawdata[0], rawdata[1]);
       clicks[i] += rawdata[0];
+      views[i] += rawdata[1];
     }
   }
 
   // create data structure for plotting click data
+  // this chart will plot both clicks and views on the same canvas
   var data = {
     labels: allNames,
     datasets: [
-      {
-        data: clicks,
+      { data: clicks,
         label: 'Clicks per Product',
         backgroundColor:'#BE666E',
+        hoverBackgroundColor: '#BE666E'
+      },
+      { data: views,
+        label: 'Views per Product',
+        backgroundColor:'#ABB49A',
         hoverBackgroundColor: '#ABB49A'
       }
     ]
   };
 
+  // draw the chart, its a stacked chart showing both
+  // clicks and views for an image
   chart = new Chart(clicksChart,{
     type: 'bar',
+    stacked: true,
     data: data,
     options: {
-      responsive: false
+      responsive: false,
+      scales: {
+        xAxes: [{stacked: false}],
+        yAxes: [{stacked:false}]
+      }
     }
   });
 }
 
+// event handler for window load action
 function loadLocalStorage() {
   for (var i = 0; i < allImages.length; i++) {
     if (localStorage.getItem(allImages[i].name) !== null) {
       var rawdata = JSON.parse(localStorage.getItem(allImages[i].name));
-      console.log(rawdata);
-      console.log(rawdata[0], rawdata[1]);
       allImages[i].numClicks = rawdata[0];
       allImages[i].numShown = rawdata[1];
     }
@@ -185,6 +185,7 @@ function loadLocalStorage() {
 
 function clearLocalStorage() {
   localStorage.clear();
+  resetStats();
 }
 
 //---------------------------------
@@ -195,11 +196,10 @@ for (var i = 0; i < allNames.length; i++) {
   var newImg = new SurveyImage(allNames[i]);
 }
 
-clearLSButton.addEventListener('click', clearLocalStorage);
+// hide buttons for survey results
+surveyResultsButtonElement.style.visibility = 'hidden';
 
-surveyResultsButtonElement.disabled = true;
-
-// Attach event listeners to the start buttons
-startButtonElement.addEventListener('click', displayRandomImages);
-
+// Attach event listeners where necessary
 window.addEventListener('load', loadLocalStorage);
+startButtonElement.addEventListener('click', displayRandomImages);
+clearLSButton.addEventListener('click', clearLocalStorage);
