@@ -43,14 +43,15 @@ header p {
 
 #threeimgset div {
   width:30%;
+  display:flex;
+  justify-content:center;
   border:1px solid #bcbcbc;
   box-shadow: 5px 8px 5px #eeeeee;
 }
 
 #img1, #img2, #img3 {
-  width: auto;
+   width: auto;
    max-width: 100%;
-   display:block;
    margin:auto;
 }
 
