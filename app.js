@@ -19,7 +19,7 @@ var imageElement3 = document.getElementById('img3');
 var startButtonElement = document.getElementById('startButton');
 var surveyResultsButtonElement = document.getElementById('surveyButton');
 var clicksChart = document.getElementById('clicksChart').getContext('2d');
-var clearLSButton = document.getElementById('clearLS');
+//var clearLSButton = document.getElementById('clearLS');
 
 //---------------------------------
 // CLASS DEFINITION
@@ -202,4 +202,4 @@ surveyResultsButtonElement.style.visibility = 'hidden';
 // Attach event listeners where necessary
 window.addEventListener('load', loadLocalStorage);
 startButtonElement.addEventListener('click', displayRandomImages);
-clearLSButton.addEventListener('click', clearLocalStorage);
+//clearLSButton.addEventListener('click', clearLocalStorage);
